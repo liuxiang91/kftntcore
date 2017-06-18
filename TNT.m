@@ -4,7 +4,7 @@
 %Input:
 %   Data sheets
 function [accuracy,dd,numTestPerYear,testSpacings] = ...
-    TNT(A,C,Q,R,INITV,INITX,regCoef,b,rho,data)
+    TNT(A,C,Q,R,INITV,INITX,regCoef,b,rho,data,warmup,cap)
 
 
 numPat=size(data,1)-1;
@@ -42,7 +42,10 @@ for i = 2:numPat+1
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Start Prediction
-    current_time = 1;
+    current_time = warmup;
+    if warmup>=T
+        continue;
+    end
     %fprintf('--start of the patient--\n');
     while current_time < T
         
@@ -77,8 +80,12 @@ for i = 2:numPat+1
             probprint{i-1}(current_time+t) = prob;
             %%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %Call a test
-            
-            if prob >= b || t>3
+            if cap==0
+                c=Inf;
+            else
+                c=cap;
+            end
+            if prob >= b || t>c
                 if t>3
                     %fprintf('  Test because too long\n');
                 end
